@@ -5,10 +5,11 @@ from segno.consts import *
 version = 6
 pixelSize = 2
 blockSize = 3 * pixelSize
+border = 0
 
 def control_blocks(QRCode):
     temp = []
-    for row in QRCode.matrix_iter(verbose=True):
+    for row in QRCode.matrix_iter(verbose=True, border=border):
         res = []
         for col in row:
             if col == TYPE_DATA_DARK or col == TYPE_DATA_LIGHT:
@@ -26,7 +27,7 @@ def apply_dithering(image):
     return dithered_image
 
 def halftoneQR(QRCode, controlBytes, image):
-    qr_matrix = list(QRCode.matrix_iter())
+    qr_matrix = list(QRCode.matrix_iter(border=border))
     qr_size = len(qr_matrix)
     width, height = qr_size * blockSize, qr_size * blockSize
 
