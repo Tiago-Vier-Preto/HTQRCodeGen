@@ -21,24 +21,25 @@ def control_blocks(QRCode):
         temp.append(res)
     return temp
 
-def apply_dithering(image):
-    image_1 = image.convert("1", dither=Image.FLOYDSTEINBERG)
-    image_2 = image.convert("1", dither=0)
-    blended_image = Image.blend(image_1.convert("L"), 
-                            image_2.convert("L"), 
-                            alpha=0.5)
+def apply_dithering(image, colorful):
+    result_image = image.convert("P").quantize(colors=64, method=Image.Quantize.MEDIANCUT, kmeans=64, dither=Image.FLOYDSTEINBERG)
+    if not colorful:
+        image_1 = image.convert("P").quantize(colors=64, method=Image.Quantize.MEDIANCUT, kmeans=64, dither=Image.FLOYDSTEINBERG)
+        image_2 = image.convert("1", dither=0)
+        blended_image = Image.blend(image_1.convert("L"), 
+                                image_2.convert("L"), 
+                                alpha=0.5).convert("P").quantize(colors=64, method=Image.Quantize.MEDIANCUT, kmeans=64, dither=Image.FLOYDSTEINBERG)
+        result_image = blended_image.convert("1", dither=Image.NONE)
+    return result_image
+    
 
-    # Converter o resultado para preto e branco novamente
-    final_image = blended_image.convert("1", dither=Image.NONE)
-    return final_image
-
-def halftoneQR(QRCode, controlBytes, image):
+def halftoneQR(QRCode, controlBytes, image, colorful):
     qr_matrix = list(QRCode.matrix_iter(border=border))
     qr_size = len(qr_matrix)
     width, height = qr_size * blockSize, qr_size * blockSize
 
     # Resize and dither the image
-    img_dithered = apply_dithering(image)
+    img_dithered = apply_dithering(image, colorful)
     result_image = img_dithered.resize((width, height), Image.NEAREST)
 
     draw = ImageDraw.Draw(result_image)
@@ -65,14 +66,16 @@ def halftoneQR(QRCode, controlBytes, image):
 
     return result_image
 
-def run(image_path, data_string):
+def run(image_path, data_string, error_correction, output_name, colorful):
     img = Image.open(image_path)
 
     # Generate the QR code
-    qrcode = segno.make(data_string, version=version, error='h')
+    qrcode = segno.make(data_string, version=version, error=error_correction)
     controlBytes = control_blocks(qrcode)
 
     # Generate halftone QR code
-    result = halftoneQR(qrcode, controlBytes, img)
+    result = halftoneQR(qrcode, controlBytes, img, colorful)
+
+    result.save(output_name + ".png")
 
     result.show()

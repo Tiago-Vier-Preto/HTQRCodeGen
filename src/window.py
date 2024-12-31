@@ -9,22 +9,33 @@ class Window (ctk.CTk):
 
         self.title("HTQRCodeGen")
         self.geometry("700x500")
+        self.configure(bg="#2E3440")  # Background color
 
         # Widgets
-        self.image_button = ctk.CTkButton(self, text="Select Image Input", command=self.select_image)
-        self.image_button.pack(pady=(50, 5))
+        self.image_button = ctk.CTkButton(self, text="Select Image Input", command=self.select_image, fg_color="#88C0D0", text_color="#2E3440")
+        self.image_button.pack(pady=(40, 0))
         self.image_path = None
 
-        self.image_label = ctk.CTkLabel(self, text="")
+        self.image_label = ctk.CTkLabel(self, text="", text_color="#D8DEE9")
         self.image_label.pack(pady=10)
 
-        self.data_string = ctk.CTkEntry(self, placeholder_text="Data String")
+        self.data_string = ctk.CTkEntry(self, placeholder_text="Data String", fg_color="#4C566A", text_color="#D8DEE9")
         self.data_string.pack(pady=10)
 
-        self.output_name = ctk.CTkEntry(self, placeholder_text="Output Name")
+        self.error_label = ctk.CTkLabel(self, text="Redundancy (error correction level):", text_color="#D8DEE9")
+        self.error_label.pack(pady=5)
+        self.dropdown_var = ctk.StringVar(value="High (30%)")
+        self.dropdown_menu = ctk.CTkOptionMenu(self, variable=self.dropdown_var, values=["Low (7%)", "Medium (15%)", "Quartile (25%)", "High (30%)"], fg_color="#4C566A", text_color="#D8DEE9")
+        self.dropdown_menu.pack(pady=10)
+
+        self.switch_var = ctk.BooleanVar(value=False)
+        self.switch = ctk.CTkSwitch(self, text="Colorful QRCode", variable=self.switch_var, onvalue=True, offvalue=False, fg_color="#4C566A", text_color="#D8DEE9")
+        self.switch.pack(pady=10)
+
+        self.output_name = ctk.CTkEntry(self, placeholder_text="Output Name", fg_color="#4C566A", text_color="#D8DEE9")
         self.output_name.pack(pady=10)
 
-        self.generate_button = ctk.CTkButton(self, text="Generate Synth", command=self.generate)
+        self.generate_button = ctk.CTkButton(self, text="Generate Synth", command=self.generate, fg_color="#88C0D0", text_color="#2E3440")
         self.generate_button.pack(pady=10)
 
     def run(self):
@@ -52,8 +63,9 @@ class Window (ctk.CTk):
         if not self.output_name.get():
             self.show_error("Digite um nome de saída.")
             return
-      
-        halftone.run(self.image_path, self.data_string.get())
+
+        selected_option = self.dropdown_var.get()[0].lower()
+        halftone.run(self.image_path, self.data_string.get(), selected_option, self.output_name.get(), self.switch_var.get())
         
         
         
