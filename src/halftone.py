@@ -22,9 +22,15 @@ def control_blocks(QRCode):
     return temp
 
 def apply_dithering(image):
-    grayscale_image = image.convert('P').quantize(colors=64, method=Image.Quantize.MEDIANCUT, kmeans=2, dither=Image.FLOYDSTEINBERG)
-    dithered_image = grayscale_image.convert('1')
-    return dithered_image
+    image_1 = image.convert("1", dither=Image.FLOYDSTEINBERG)
+    image_2 = image.convert("1", dither=0)
+    blended_image = Image.blend(image_1.convert("L"), 
+                            image_2.convert("L"), 
+                            alpha=0.5)
+
+    # Converter o resultado para preto e branco novamente
+    final_image = blended_image.convert("1", dither=Image.NONE)
+    return final_image
 
 def halftoneQR(QRCode, controlBytes, image):
     qr_matrix = list(QRCode.matrix_iter(border=border))
@@ -46,7 +52,7 @@ def halftoneQR(QRCode, controlBytes, image):
             mid_x = x + pixelSize
             mid_y = y + pixelSize
             color = "black" if cell else "white"
-            draw.rectangle([mid_x, mid_y, mid_x + pixelSize, mid_y + pixelSize], fill=color)
+            draw.rectangle([mid_x, mid_y, mid_x + 1, mid_y + 1], fill=color)
 
     # Redraw control blocks on top
     for row_idx, row in enumerate(controlBytes):
