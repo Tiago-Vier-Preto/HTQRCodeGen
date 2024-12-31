@@ -22,8 +22,8 @@ def control_blocks(QRCode):
     return temp
 
 def apply_dithering(image):
-    grayscale_image = image.convert('L')
-    dithered_image = grayscale_image.convert('1', dither=0)
+    grayscale_image = image.convert('P').quantize(colors=64, method=Image.Quantize.MEDIANCUT, kmeans=2, dither=Image.FLOYDSTEINBERG)
+    dithered_image = grayscale_image.convert('1')
     return dithered_image
 
 def halftoneQR(QRCode, controlBytes, image):
@@ -33,25 +33,14 @@ def halftoneQR(QRCode, controlBytes, image):
 
     # Resize and dither the image
     img_dithered = apply_dithering(image)
-    img_dithered = img_dithered.resize((width, height), Image.NEAREST)
+    result_image = img_dithered.resize((width, height), Image.NEAREST)
 
-    # Criar uma nova imagem para desenhar
-    result_image = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(result_image)
 
     for row_idx, row in enumerate(qr_matrix):
         for col_idx, cell in enumerate(row):
             x = col_idx * blockSize
             y = row_idx * blockSize
-
-            # Draw the 9-pixel grid from the dithered image
-            for i in range(3):
-                for j in range(3):
-                    pixel_x = x + j * pixelSize
-                    pixel_y = y + i * pixelSize
-                    pixel_color = img_dithered.getpixel((pixel_x, pixel_y))
-                    color = "black" if pixel_color == 0 else "white"
-                    draw.rectangle([pixel_x, pixel_y, pixel_x + pixelSize, pixel_y + pixelSize], fill=color)
 
             # Set the middle block to the QR code value
             mid_x = x + pixelSize
@@ -69,7 +58,6 @@ def halftoneQR(QRCode, controlBytes, image):
                 draw.rectangle([x, y, x + blockSize, y + blockSize], fill=color)
 
     return result_image
-
 
 def run(image_path, data_string):
     img = Image.open(image_path)
