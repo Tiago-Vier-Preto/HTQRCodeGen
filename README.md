@@ -2,6 +2,10 @@
 
 This is a simple Python script that applies dithering to images before embedding them into QR Codes. The script converts an input image into a black-and-white dithered version, then integrates it into a scannable QR Code.
 
+![image](img/car_qrcode.png)
+
+![image](img/cat_qrcode.png)
+
 ## Features
 
 - Converts images to black-and-white using dithering (Floyd-Steinberg or other methods)
@@ -12,13 +16,16 @@ This is a simple Python script that applies dithering to images before embedding
 ## Requirements
 
 - Python 3.x
-- `pillow` (for image processing)
-- `segno` (for QR code generation)
+- `pillow` 
+- `segno` 
+- `customtkinter` 
+- `numpy`
+- `darkdetect`
 
 You can install dependencies using:
 
 ```bash
-pip -r requirements.txt
+pip install -r requirements.txt
 ```
 
 ## Usage
